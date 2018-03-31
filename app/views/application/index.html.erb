@@ -1,0 +1,7 @@
+Home Page
+
+<% if current_user %>
+  <%= link_to "Tasks", tasks_path %>
+<% end %>
+
+<%= link_to "Log in", new_user_session_path %>

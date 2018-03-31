@@ -1,10 +1,12 @@
 class TasksController < ApplicationController
+  before_action :check_login
   before_action :set_task, only: [:show, :edit, :update, :destroy]
+  before_action :check_ownership_of_task
 
   # GET /tasks
   # GET /tasks.json
   def index
-    @tasks = Task.all
+    @tasks = current_user.tasks
   end
 
   # GET /tasks/1
@@ -69,6 +71,24 @@ class TasksController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def task_params
-      params.require(:task).permit(:title, :description, :user_id)
+      params.require(:task).permit(:title, :description).merge(user_id: current_user.id)
+    end
+
+    def check_login
+      if !current_user
+        flash[:notice] = "User not signed in!"
+        flash.keep(:notice)
+        redirect_to '/users/sign_in'
+      end
+    end
+
+    def check_ownership_of_task
+      if @task
+        unless @task.user == current_user
+          flash[:notice] = "User does not own that task!"
+          flash.keep(:notice)
+          redirect_to '/users/sign_in'
+        end
+      end
     end
 end

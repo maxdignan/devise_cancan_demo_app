@@ -6,7 +6,11 @@ class TasksController < ApplicationController
   # GET /tasks
   # GET /tasks.json
   def index
-    @tasks = current_user.tasks
+    if can? :manage, Task
+      @tasks = Task.all
+    else
+      @tasks = current_user.tasks
+    end
   end
 
   # GET /tasks/1
@@ -83,6 +87,8 @@ class TasksController < ApplicationController
     end
 
     def check_ownership_of_task
+      return if can? :manage, @task  #skips check for admin
+
       if @task
         unless @task.user == current_user
           flash[:notice] = "User does not own that task!"
